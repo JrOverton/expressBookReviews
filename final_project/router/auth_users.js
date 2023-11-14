@@ -6,15 +6,15 @@ const regd_users = express.Router();
 let users = [];
 
 const isValid = (username)=>{ 
-    let userwithsamename = users.filter((user)=>{
+    let userswithsamename = users.filter((user)=>{
         return user.username === username
-    });
-    if(userwithsamename.length > 0){
+      });
+      if(userswithsamename.length > 0){
         return true;
-    }else{
+      } else {
         return false;
+      }
     }
-}
 
 const authenticatedUser = (username,password)=>{
         let validusers = users.filter((user)=>{
@@ -26,7 +26,7 @@ const authenticatedUser = (username,password)=>{
           return false;
         }
       }
-
+      
 //only registered users can login
 regd_users.post("/login", (req,res) => {
     const username = req.body.username;
@@ -52,9 +52,22 @@ regd_users.post("/login", (req,res) => {
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
-});
+
+    const isbn = req.params.isbn;
+    let filtered_book = books[isbn]
+    if (filtered_book) {
+        let review = req.query.review;
+        let reviewer = req.session.authorization['username'];
+        if(review) {
+            filtered_book['reviews'][reviewer] = review;
+            books[isbn] = filtered_book;
+        }
+        res.send(`The review for the book with ISBN  ${isbn} has been added/updated.`);
+    }
+    else{
+        res.send("Unable to find this ISBN!");
+    }
+  });
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
